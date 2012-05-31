@@ -1,0 +1,12 @@
+<% form_for @hostel do |f| %>
+
+      <div id="form-errors"></div>
+
+  <div class="label-field-pair">
+    <div class="label-container"><%= f.label :house %></div>
+    <div class="input-container"> <%= f.text_field :house %></div>
+  </div>
+
+   <%= f.submit  "", :value => "► Save", :class => "submit_button" %>
+
+<% end %>

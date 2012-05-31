@@ -1,0 +1,41 @@
+<div id="content-header">
+  <img src="/images/student_details/student_details_logo.jpg" />
+  <h1>Ranking of all class in a form </h1>
+  <h3>Class Ranks</h3>
+  <div id="app-back-button">
+    <%= link_to_function image_tag("/images/buttons/back.png",:border => 0), "history.back()" %>
+  </div>
+  
+	<div class="print_this">
+	<a href="javascript:void" onclick="window.print();return false;" >Print this page</a>	
+	</div>
+
+</div>
+
+<div id="page-yield">
+
+  <% unless flash[:notice].nil? %>
+    <p class="flash-msg"> <%= flash[:notice] %> </p>
+  <% end %>
+
+  <div class="label-field-pair-select-class">
+    <label for="student-detail-select-class">Select a Course</label>
+    <div class="text-input-bg">
+    
+    <% course_array = @courses.map { |c| [c.course_name] } %>
+    <%= select_tag "course_name", "<option>Select a Course</option>" +  options_for_select(course_array), 
+ 		{ :onchange => remote_function(:url => {:action => 'list_ranks_by_class_form'}, 
+  	:with => 'Form.Element.serialize(this)',
+  	:before => "Element.show('loader')",
+    :success => "Element.hide('loader')")  } %>
+  	
+  	</div>
+    <%= image_tag("loader.gif",
+      :align => "absmiddle",
+      :border => 0,
+      :id => "loader",
+      :style =>"display: none;" ) %>
+  </div>
+  <div id="students"> </div>
+
+</div>

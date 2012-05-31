@@ -1,0 +1,13 @@
+#header,#side_bar,#content-header,.label-field-pair-select-class,#footer,.extender,.anylinkmenu,.col-4{
+display:none;
+
+}
+table,tr{
+border:1px solid black;
+border-collapse:collapse;
+}
+td,th{
+border-left:1px solid black;
+}
+
+

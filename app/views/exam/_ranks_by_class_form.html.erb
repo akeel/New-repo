@@ -1,0 +1,55 @@
+<div class="students-table">
+  <table align="center" width="100%" cellpadding="1" cellspacing="1">
+  <center><b>Class Rankings For: <%= @course.course_name%></b></center>
+    <tr class="tr-head">
+      <th>
+        Rank
+      </th>
+      <th>
+        Name
+      </th>
+      <th>
+        Score
+      </th>     
+      
+    </tr>
+    <tr>
+      <td>
+
+      </td>
+      <td>
+
+      </td>
+      <td>
+
+      </td>
+    </tr>
+		<%course_total = Hash.new %>
+
+	<%@courses.each do |course|%>
+		<%avg = course.form_avg %>
+		<%course_total[course.id] = avg unless avg.nil?%>
+	<% end %>
+	<%course_total = course_total.sort_by { |k,v| v }%>
+  <%course_total = course_total.reverse%>
+  
+  <% a = 0%>
+    <% course_total.each do |key, value|%>
+		<%course = Course.find(key)%> 
+      <tr class="tr-<%= cycle('odd', 'even') %>">
+        <td class="col-1">
+         	<%= a += 1%>          
+        </td>
+
+        <td class="col-2">
+					<%= course.full_name%>
+        </td>
+                
+        <td>
+        		<%= "%.2f" %value %>
+        </td>
+
+      </tr>
+	<% end %>
+  </table>
+</div>

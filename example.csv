@@ -1,0 +1,10 @@
+admission_no,first_name,last_name,batch_id,date_of_birth,gender,admission_date
+3454, student_one1,student10,13,10-11-2001,m,10-11-2005
+8786, student_one2,student11,11,10-11-2001,f,10-11-2005
+416, student_one3,student12,13,10-11-2001,m,10-11-2005
+856, student_one4,student13,11,10-11-2001,m,10-11-2005
+087, student_one5,student14,13,10-11-2001,m,10-11-2005
+364, student_one6,student15,10,10-11-2001,m,10-11-2005
+857, student_one7,student16,13,10-11-2001,m,10-11-2005
+956, student_one8,student17,10,10-11-2001,f,10-11-2005
+0867, student_one9,student18,10,10-11-2001,f,10-11-2005

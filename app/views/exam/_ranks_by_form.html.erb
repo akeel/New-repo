@@ -1,0 +1,84 @@
+<div class="students-table">
+  <table align="center" width="100%" cellpadding="1" cellspacing="1">
+   <center><b>Form Wise Ranking For : <%= @course.course_name%></b></center>
+    <tr class="tr-head">
+      <th>
+        Rank
+      </th>
+      <th>
+        Name
+      </th>
+      <th>
+        Score
+      </th>
+      
+      <th>
+        Adm no.
+      </th>
+      <th class="col-4">
+
+      </th>
+      
+      
+    </tr>
+    <tr>
+      <td>
+
+      </td>
+      <td>
+
+      </td>
+      <td>
+
+      </td>
+      <td>
+
+      </td>
+    </tr>
+		<%hash_new = Hash.new %>
+	<%@courses.each do |course|%>
+		<%hash = course.form_top %>
+		<% hash_new = hash.merge(hash_new)%>		
+	<%end%>
+	
+	<%hash_new = hash_new.sort_by { |k,v| v }%>
+	<%hash_new = hash_new.reverse%>	
+    
+    <%a=0%>
+    <% hash_new.each_with_index do |(key, value), index|%>
+    <%student = key%>
+      <tr class="tr-<%= cycle('odd', 'even') %>">
+        <td class="col-1">
+          <% if hash_new[index][1] == hash_new[index-1][1] and value != 0%>
+          <%= a %>
+         	<%elsif value == 0%>
+         			n/a
+         	<%else%>
+         	<%= a += 1%>
+         	<% end %> 
+          
+        </td>
+
+        <td class="col-2">
+          <%= link_to student.full_name,:controller => "student", :action => "profile", :id => student.id %>
+        </td>
+                
+        <td>
+        		<%if value != 0%>
+        		<%= "%.2f" %value %>
+        		<%else%>
+        			n/a
+        		<%end%>
+        </td>
+
+        <td class="col-3">
+          <%= student.admission_no %>
+        </td>
+
+        <td class="col-4">
+          <%=  link_to 'View Profile', :controller => "student", :action => "profile", :id => student.id %>
+        </td>
+      </tr>
+	<% end %>
+  </table>
+</div>

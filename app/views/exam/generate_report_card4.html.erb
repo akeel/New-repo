@@ -1,0 +1,233 @@
+<%= stylesheet_link_tag 'exam/generate_report_card4.css', :media => 'all' %>
+
+<div class="print_this">
+<input type="button" value=" Print this page "
+onclick="window.print();return false;" />
+</div>
+<table class="header">
+	<tr>
+	<th rowspan="3"> <%= image_tag("logo.jpg", :alt => "Logo", :id=>"logo_size") %></th>
+	<td class="school">MANGU HIGH SCHOOL</td>
+	</tr>
+	<tr><td>P.O BOX 314- 01000 THIKA TEL 25420 2319804
+</td></tr>
+	<tr><td  style="font-size: 20px;">Progress Report Form</td></tr>
+	</tr>
+	</table>
+	
+	<table class="student_details">
+	<tr >
+	<tr>
+	<td>Name: <%=@student.full_name%></td>
+	<td>Admission No.: <%=@student.admission_no%></td>
+	<td>Age: <%=@student.age%></td>	
+	</tr>
+	</table>
+	<table class="student_name">
+	<tr>
+	<td class="batch_course"><%=@student.batch.course.full_name%></td>
+	<td class="batch_name">Term: <%= @student.batch.name %></td>
+	<td class="year_one">Year: <%= Time.now.year%></td>
+	<td>House: </td>
+	</tr>
+	</table>
+	<table class="year">
+	<tr>
+	<%total_students = Student.find_all_by_batch_id(@student.batch_id)%>
+		<% @max_total = 0 %>
+        <% @marks_total = 0 %>
+         <% @total_wt = 0%>
+        <% mean_class = @student.current_class_mean %>	
+
+        <% @exam_groups.each do |exam_group| %>
+          <% unless exam_group.exam_type == "Grades" %>
+          <% @exam = Exam.find_by_exam_group_id(exam_group.id) %>
+            <% @total_wt += @exam.weightage%>
+            <% @max_total = @max_total + exam_group.total_marks(@student)[1] %>
+            <% @marks_total = @marks_total + exam_group.total_marks(@student)[0] %>
+          <% end %>
+    <% end %>
+    <%tot_weight = @total_wt*@subjects.length %>
+    <% percentage = (@marks_total*100/@max_total.to_f)  unless @max_total==0%>
+    <% class_percentage = (mean_class*100/tot_weight.to_f)  unless tot_weight==0%>
+    
+    <td>Class Mean Marks: 
+		<%= "%.2f" %class_percentage  unless class_percentage.nil? %>	
+		</td>
+		<td>Student's Mean Marks: <%= "%.2f" %percentage  unless percentage.nil?%></td>
+		<td>Class Position: <% pos,pos_of = @student.current_class_position %> <%= pos %> out of <%= pos_of %>
+		
+		
+		</td>
+	</tr>
+	
+	<tr>
+	<td>Class Mean Grade:
+	<% unless mean_class == 0
+    grade = GradingLevel.percentage_to_grade(class_percentage,nil) %>
+    <%= grade.name %>
+              
+    <% else %>
+        -
+    <% end %>
+	
+	
+	
+	</td>
+	<td>Student's Mean Grade: <% unless percentage == 0
+    grade = GradingLevel.percentage_to_grade(percentage,nil) %>
+    <%= grade.name %>
+              
+    <% else %>
+        -
+    <% end %></td>
+	<td>Form Position: <% pos2,pos_of2 = @student.current_course_position %> <%= pos2 %> out of <%= pos_of2 %></td></tr>
+	
+	
+	
+	
+	</tr>
+	</table>
+	<table class="grade_details">
+	<tr>
+			<th>Subject</th>
+			<th>Term Mark</th>
+			<th>Term Grade</th>
+			<th>Exam Mark</th>
+			<th>Exam Grade</th>
+			<th>Teacher's Remark</th>
+			<th>Teacher's Sign</th>
+	</tr>
+
+      <% calculated_total_weightage = [] %>
+      <%cat_score_final = 0 %>
+      <% end_score_final = 0%>
+ <% @subjects.each do |subject| %>
+        <tr >
+          <td class="col-2" ><%= subject.name %></td>
+          <% @mmg = 1;@g = 1 %>
+          <% student_calculated_total_weightage = [] %>
+
+          <% 
+             cat_score = 0
+             cat_weight = ""
+             end_score = 0
+             end_weight = ""
+             total_cat_score = 0
+             @sum_total = 0
+             @exam_groups.each do |exam_group| %>
+							
+            <% @exam = Exam.find_by_subject_id_and_exam_group_id(subject.id,exam_group.id) %>
+            <% @sum_total += @exam.weightage%>
+            <% exam_score = ExamScore.find_by_student_id(@student.id, :conditions=>{:exam_id=>@exam.id})unless @exam.nil? %>
+              <% unless @exam.nil? %>
+                 <% unless exam_score.nil? %>
+                  <% if exam_group.is_term? %>
+                     <% end_score = exam_score.calculated_weightage%>
+                     <%end_weight += exam_score.grading_level.to_s %>
+                  <% else %>
+                      <% cat_score += exam_score.calculated_weightage %>
+                     <% cat_weight += exam_score.grading_level.to_s %>
+                     <% total_cat_score += cat_score %>
+                     
+                  <% end %> 
+                  <% student_calculated_total_weightage << exam_score.calculated_weightage %>
+                  <% end %>
+              <% end %>
+            <% end %>
+            <td><%= cat_score %> </td>
+           
+            <td><% unless total_cat_score == 0
+            grade = GradingLevel.percentage_to_grade(cat_score*100/total_cat_score,nil) %>
+              <%= grade.name %>
+              
+              <% else %>
+               -
+              <% end %>
+              
+              </td>
+            <td><%= end_score %></td>
+            <td><%= end_weight.blank? ? "-" : end_weight %></td>
+            <td></td>
+            <td></td> 
+        </tr>
+				<% cat_score_final += cat_score %>
+				<% end_score_final += end_score%>
+
+      <% end %>
+
+
+	
+	<tr>
+		<td >TOTAL MARKS</td>
+		<td colspan="2"><%= cat_score_final%></td>
+
+		<td colspan="2"><%= end_score_final%></td>
+		<%@sum_total = @sum_total*@subjects.length%>
+		<td colspan="2"> <%= cat_score_final + end_score_final%> out of <%=@sum_total%> </td>
+		
+			
+	</tr>
+	</table>
+	
+	<table class="position_section">
+	<tr>	
+	
+	<tr>
+	<td>Mean Marks: <%= "%.2f" %percentage  unless percentage.nil?%></td>
+	<td>Mean Grade:
+		<% unless percentage == 0
+    grade = GradingLevel.percentage_to_grade(percentage,nil) %>
+    <%= grade.name %>
+              
+    <% else %>
+        -
+    <% end %>
+	</td>	
+	</tr>
+	
+	<tr>
+	<td></td>
+	</tr>
+	</table>
+	
+	<table class="remarks_index">
+	<tr>
+	<th colspan="4">REMARKS</th>
+	<tr><td>1. Excellent Performance</td><td>4. Has Improved</td><td>7. Lacks Concentration</td><td>10. Absent</td> </tr>
+	<tr><td>2.  Hard Working</td><td> 5. Can do Better</td><td>8. Does Not Take Correction Seriously</td></tr>
+	<tr><td>3. Takes Keen Interest</td><td>6. Has Dropped</td><td> 9. Not serious in Assignments</td></tr>	
+	</tr>
+	</table>
+	<table class="clubs_games">
+	<tr>
+<tr><td>Clubs And Games</td></tr>
+<tr><td>Responsibilities</td></tr>	
+	</tr>
+	</table>
+	<table class="remarks_section">
+	<tr >	
+		<tr class="teacher_remark">
+		<td>Class Teacher's Remarks:</td>	
+		</tr>
+		
+		<tr class="matron_remark">
+		<td>Class Teacher's Remarks: Example Remarks on the report</td>		
+		</tr>
+		
+		<tr class="principal_remark">
+		<td>Class Teacher's Remarks: Example Remarks on the report</td>		
+		</tr>	
+	</tr>
+	</table>
+	<table class="end_notes">
+	
+	<tr><td>Next Term Begins On:</td>
+	<td>Ends On:</td>
+	</tr>
+	<tr>
+	<td colspan="2">All students report by 5.30 p.m on the day before the term begins in full scholl uniform.
+	</td>
+	</tr>	
+	
+</table>

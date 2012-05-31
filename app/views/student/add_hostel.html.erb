@@ -1,0 +1,13 @@
+<% form_for :controller => "students", :action => "update_hostel" do |f| %>
+
+      <div id="form-errors"></div>
+
+  <div class="label-field-pair">
+    <div class="label-container"><%= f.label "Select House" %></div>
+    <div class="input-container">  <%= f.select :hostel_id, :name,
+                   Hostel.map { |b| [b.house, b.id] }%></div>
+  </div>
+
+   <%= f.submit  "", :value => "► Save", :class => "submit_button" %>
+
+<% end %>

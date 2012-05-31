@@ -1,0 +1,26 @@
+<div id="content-header">
+  <img src="/images/examination/show_exam.png" alt="Exam" />
+  <h1>Exams</h1>
+  <h3>Home</h3>
+  <div id="app-back-button">
+    <%= link_to_function image_tag("/images/buttons/back.png",:border => 0), "history.back()" %>
+  </div>
+</div>
+
+    <div class="performance_index">
+    <div class="link-box">
+      <div class="link-heading"><%= link_to 'Class Wise Ranking' ,:action => 'top_class' %></div>
+      <div class="link-descr">Generates ranks of all students in a class</div>
+    </div>
+    <div class="link-box">
+      <div class="link-heading"><%= link_to 'Form Wise Ranking' ,:action => 'form_top'  %></div>
+      <div class="link-descr">Generates ranks of all students in a form</div>
+    </div>
+    <div class="link-box">
+      <div class="link-heading"><%= link_to 'Class Rankings' ,:action => 'best_class_form' %> </div>
+      <div class="link-descr">Generates ranks of each class in a form</div>
+    </div>
+  </div>
+  
+
+

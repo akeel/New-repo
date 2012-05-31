@@ -1,0 +1,5 @@
+<% @batch.each do |batch| %>
+    <div class="link-box">
+      <div class="link-heading"><%= link_to batch.full_name, "/top_ten_class/#{batch.id}" %> </div>
+    </div>
+<% end %>

@@ -1,0 +1,25 @@
+development:
+      host: localhost
+      adapter: mysql2
+      database: mangu
+      username: root
+      password: 
+
+test: &test
+      host: localhost
+      adapter: mysql2
+      database: mangunow
+      port: 3306
+      username: root
+      password: senha
+
+production:
+      host: localhost
+      adapter: mysql2
+      database: manguthen
+      port: 3306
+      username: root
+      password: senha
+
+cucumber:
+  <<: *test
