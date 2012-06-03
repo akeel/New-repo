@@ -95,7 +95,7 @@
 
       <tr class="odd left"><td>Category</td><td class="right"><%= @student.student_category.name unless @student.student_category.nil? %></td></tr>
       
-      <%if @student.student_category.name == "Full Boarders" %>
+      <%if !@student.student_category.nil? && @student.student_category.name == "Full Boarders" %>
       <tr class="odd left"><td>Hostel</td><td class="right"><%= @student.hostel.house unless @student.hostel.nil? %></td></tr>
       <%end%>
       

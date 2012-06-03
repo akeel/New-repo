@@ -26,7 +26,7 @@ class Student < ActiveRecord::Base
 
   has_one    :immediate_contact
   has_one    :student_previous_data
-  has_many   :student_previous_subject_mark
+  has_many   :student_previous_subject_marks
   has_many   :guardians, :foreign_key => 'ward_id', :dependent => :destroy
   has_many   :finance_transactions
   has_many   :attendances
@@ -135,10 +135,10 @@ class Student < ActiveRecord::Base
   end
   
   def age
-  	now = Time.now.utc.to_date
-  	dob = self.date_of_birth
-  	now.year - dob.year - ((now.month > dob.month || (now.month == dob.month && now.day >= dob.day)) ? 0 : 1)
-	end
+     now = Time.now.utc.to_date
+     dob = self.date_of_birth
+     now.year - dob.year - ((now.month > dob.month || (now.month == dob.month && now.day >= dob.day)) ? 0 : 1)
+  end
 
   def all_batches
     self.graduated_batches + self.batch.to_a
@@ -291,11 +291,10 @@ class Student < ActiveRecord::Base
     marks = 0
     subjects = self.subjects
     subjects.each do |subject|
-      
       self.batch.exam_groups.each do |exam_group|
        exam = Exam.find_by_subject_id_and_exam_group_id(subject.id,exam_group.id)
        exam_score = nil
-       exam_score = ExamScore.find_by_student_id(self.id, :conditions=>{:exam_id=>exam.id})unless exam.nil?
+       exam_score = ExamScore.find_by_student_id(self.id, :conditions=>{:exam_id=>exam.id}) unless exam.nil?
        marks += exam_score.calculated_weightage unless exam_score.nil?
       end
     end  
@@ -362,6 +361,23 @@ class Student < ActiveRecord::Base
     arry += ar
     end
     return arry/arr_size
+ end
+
+ def serial_number
+      if !self.first_name.nil?
+        serial_num = "#{self.first_name[0,3].upcase}-#{self.admission_no}"
+      elsif !self.last_name.nil?
+        serial_num = "#{self.last_name[0,3].upcase}-#{self.admission_no}"
+      end
+      return serial_num
+ end
+  
+  def previous_month_marks
+      markes = 0.0
+      if !self.student_previous_subject_marks.blank?
+          markes = self.student_previous_subject_marks.sum(:mark)
+      end
+      return markes
  end
  
  

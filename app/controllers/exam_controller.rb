@@ -593,10 +593,19 @@ class ExamController < ApplicationController
     end
 
     def per_user_report
-      if params[:id]
+       if params[:id]
         send_data PerUserReport.new.to_pdf(params[:id]), :filename => "per_user_report.pdf", :type => 'application/pdf'
       end
     end
+
+    #def examam
+   #  @batch = Batch.find 2
+   #  @exam_groups = ExamGroup.find_all_by_batch_id(@batch.id)
+    # @mean_mark_class = @batch.class_mean_marks*100
+   #  @students = @batch.students.find(:all,:conditions=>{:id => 407})
+   #  render :pdf => 'examam',
+     #         :orientation => 'Landscape'  
+    #end
 
     def academic_report
         #academic-archived-report

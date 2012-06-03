@@ -83,9 +83,9 @@ class Batch < ActiveRecord::Base
   
   def class_mean_marks
   	arr = Array.new
-    self.students.each do |std|
-      arr << std.total_marks
-    end
+       self.students.each do |std|
+          arr << std.total_marks
+       end
     arry = 0
     arr_size = arr.length
     arr.each do |ar|
