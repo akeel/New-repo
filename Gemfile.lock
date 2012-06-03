@@ -25,9 +25,9 @@ GEM
     pdf-reader (1.0.0)
       Ascii85 (~> 1.0.0)
       ruby-rc4
-    prawn (0.12.0)
+    prawn (1.0.0.rc1)
       pdf-reader (>= 0.9.0)
-      ttfunk (~> 1.0.2)
+      ttfunk (~> 1.0.3)
     pry (0.9.7.4)
       coderay (~> 0.9.8)
       method_source (~> 0.6.7)

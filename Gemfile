@@ -10,7 +10,7 @@ gem "sqlite3-ruby", :require => "sqlite3"
 gem "searchlogic", "2.4.27"
 gem "fastercsv"
 gem 'wicked_pdf'
-gem 'prawn'
+gem 'prawn',"1.0.0.rc1"
 gem 'ruby-debug'
 
 # bundler requires these gems in all environments
