@@ -5,10 +5,10 @@ class PerUserReport < Prawn::Document
   end
 
   def to_pdf id
-    @batch = Batch.find 11
-    @exam_groups = @batch.exam_groups
+    @batch = Batch.find id
+    @exam_groups = ExamGroup.find_all_by_batch_id(@batch.id)
     @mean_mark_class = @batch.class_mean_marks*100
-    @students = @batch.students
+    @students = @batch.students.find(:all,:conditions=>{:id => 407})
     @students = []
     @students.push(@batch.students.first)
     if @batch
