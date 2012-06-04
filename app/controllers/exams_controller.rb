@@ -80,9 +80,9 @@ class ExamsController < ApplicationController
     @employee_subjects=[]
     @employee_subjects= @current_user.employee_record.subjects.map { |n| n.id} if @current_user.employee?
     @exam = Exam.find params[:id], :include => :exam_group
-    unless @employee_subjects.include?("#{@exam.subject_id}") or @current_user.admin? or @current_user.privileges.map{|p| p.id}.include?(1) or @current_user.privileges.map{|p| p.id}.include?(2)
+    unless  @current_user.admin? or ( @employee_subjects.include?(@exam.subject_id) &&  (@current_user.privileges.map{|p| p.id}.include?(1) or @current_user.privileges.map{|p| p.id}.include?(2)))
       flash[:notice] = 'Access Denied.'
-      redirect_to :controller=>"user", :action=>"dashboard"
+      redirect_to :back
     end
     exam_subject = Subject.find(@exam.subject_id)
     is_elective = exam_subject.elective_group_id
