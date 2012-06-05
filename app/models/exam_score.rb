@@ -88,7 +88,8 @@ class ExamScore < ActiveRecord::Base
     
   end
 
-  private
+  protected
+
   def calculate_grade
     exam = self.exam
     exam_group = exam.exam_group

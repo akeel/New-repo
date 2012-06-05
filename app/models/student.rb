@@ -323,7 +323,7 @@ class Student < ActiveRecord::Base
     return position,out_of
  end 
 
- 	def current_course_position
+  def current_course_position
     hash = Hash.new
     course_name = self.batch.course.course_name
     courses = Course.find(:all, :conditions => {:course_name => course_name})			
@@ -379,6 +379,60 @@ class Student < ActiveRecord::Base
       end
       return markes
  end
+
+  def current_class_position
+    hash = Hash.new
+    students = self.batch.students
+    students.each do |std|
+      hash[std.id] = std.total_marks
+    end
+    hash = hash.sort_by { |k,v| v }
+    hash = hash.reverse
+    hash_new = Hash.new
+    a = 0 
+    hash.each_with_index do |(key, value), index|
+    	if hash[index][1] == hash[index-1][1] and value != 0
+    		hash_new[key] = a
+    	else
+   		 hash_new[key] = a+= 1
+    	end
+    end
+    position = hash_new[self.id]
+    out_of  =  hash_new.size
+    return position,out_of
+ end 
+
+  def subject_marks(subject_id)
+      marks = 0
+      self.batch.exam_groups.each do |exam_group|
+       exam = Exam.find_by_subject_id_and_exam_group_id(subject_id,exam_group.id)
+       exam_score = nil
+       exam_score = ExamScore.find_by_student_id(self.id, :conditions=>{:exam_id=>exam.id}) unless exam.nil?
+       marks += exam_score.calculated_weightage.to_f unless exam_score.nil?
+      end
+    return marks
+  end
+
+ def current_subject_position(subject_id)
+    hash = Hash.new
+    students = self.batch.students
+    students.each do |std|
+      hash[std.id] = std.subject_marks(subject_id)
+    end
+    hash = hash.sort_by { |k,v| v }
+    hash = hash.reverse
+    hash_new = Hash.new
+    a = 0 
+    hash.each_with_index do |(key, value), index|
+    	if hash[index][1] == hash[index-1][1] and value != 0
+    		hash_new[key] = a
+    	else
+   		 hash_new[key] = a+= 1
+    	end
+    end
+    position = hash_new[self.id]
+    return position
+ end 
  
  
 end

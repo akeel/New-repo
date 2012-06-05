@@ -5,13 +5,10 @@ class PerUserReport < Prawn::Document
   end
 
   def to_pdf id
-    @batch = Batch.find id
+    @batch = Batch.find id	
     @exam_groups = ExamGroup.find_all_by_batch_id(@batch.id)
     @mean_mark_class = @batch.class_mean_marks*100
     @students = @batch.students
-#     @students = []
-#     @students.push(@batch.students.first)
-#     debugger
     if @batch
       @students.each do |student|
       @subjects = student.subjects         
@@ -47,13 +44,10 @@ class PerUserReport < Prawn::Document
         image student_image,:at=>[400,715] if !student_image.nil?
 
     ### watermark
-        text_box "<color rgb='FF00FF'>#{student.serial_number}</color>", :size => 22,:at=>[200,300],:rotate=>45,:inline_format => true
+#         text_box "<color rgb='FF00FF'>#{student.serial_number}</color>", :size => 22,:at=>[200,300],:rotate=>45,:inline_format => true
 
 
     ###
-     move_down 2
-     table([["Serial Number: #{student.serial_number}","Expencted Postition:#{student.previous_month_marks}"]], :cell_style => {:border_width => 0,:size =>10}) 
-   
      move_down 5        
      table([["Name: #{student.first_name} #{student.middle_name} #{student.last_name}", "Admission No.: #{student.admission_no}", "Age: #{age(student.date_of_birth).to_s}"],
                  ["#{@batch.course.full_name}   Term: #{@batch.name}", "Year: #{@batch.start_date.year.to_s}", "House: #{student.hostel.house if !student.hostel.nil?}"],
@@ -63,7 +57,7 @@ class PerUserReport < Prawn::Document
 
         # table
         move_down 15
-        header_table = [['Subject', "TERM\nMARK", "TERM\nGRADE", "EXAM\nMARK", "EXAM\nGRADE", "TEACHER'S REMARK", "TEACHER'S\nSIGN"]]
+        header_table = [['Subject',"Subject Position", "TERM\nMARK", "TERM\nGRADE", "EXAM\nMARK", "EXAM\nGRADE", "TEACHER'S REMARK", "TEACHER'S\nSIGN"]]
         @cat_score_final = 0
 	@end_score_final = 0	
         @subjects.each do |s|
@@ -80,7 +74,7 @@ class PerUserReport < Prawn::Document
 				        exam_score = ExamScore.find_by_student_id(student.id, :conditions=>{:exam_id=>@exam.id}) unless @exam.nil?
 				         unless @exam.nil?
 				           unless exam_score.nil?
-					  if exam_group.is_term?
+    					   if exam_group.is_term?
 				             end_score = exam_score.calculated_weightage
 				             end_weight += exam_score.grading_level.to_s
 				            else 
@@ -93,27 +87,24 @@ class PerUserReport < Prawn::Document
 				         end
 								end
 											        
-						unless total_cat_score == 0
+	unless total_cat_score == 0
             @grade = GradingLevel.percentage_to_grade(cat_score*100/total_cat_score,nil).name
             else
             @grade = "-"
-						end
-												
-				                                  
-          header_table += [[s.name, "#{cat_score}", "#{@grade}", "#{end_score}", "#{end_weight.blank? ? "-" : end_weight}", "#{teacher_remark(end_weight)}", ""]]
-          @cat_score_final += cat_score
-	  @end_score_final += end_score	
-       
+	end
+        header_table += [[s.name,"#{student.current_subject_position(s.id)}" ,"#{cat_score}", "#{@grade}", "#{end_score}", "#{end_weight.blank? ? "-" : end_weight}", "#{teacher_remark(@grade)}", ""]]
+        @cat_score_final += cat_score
+        @end_score_final += end_score 
         end
         
-        header_table += [["TOTAL MARKS", @cat_score_final, "",@end_score_final, "", "#{@cat_score_final + @end_score_final} out of #{@tot_weight}", ""]]
+        header_table += [["TOTAL MARKS","", @cat_score_final, "",@end_score_final, "", "#{@cat_score_final + @end_score_final} out of #{@tot_weight}", ""]]
         table header_table, :width => self.bounds.width, :cell_style => { :size => 6 }
 
         # after table comments
         move_down 15
         
         text_box 'Mean marks:', :size => 10, :width => 125, :at => [200, cursor]
-        text_box "#{"%.2f" %@percentage}", :size => 10, :width => 40, :at => [270, cursor]
+        text_box "#{'%.2f' %@percentage}", :size => 10, :width => 40, :at => [270, cursor]
         text_box 'Mean Grade:', :size => 10, :width => 125, :at => [400, cursor]
         text_box "#{@grade_student.name}", :size => 10, :width => 80, :at => [460, cursor]
         
@@ -163,7 +154,7 @@ class PerUserReport < Prawn::Document
           end
         end
         
-	move_down 15
+	move_down 13
         group do
           bounding_box [0, cursor], :width => self.bounds.width, :height => 40 do
             stroke_bounds
@@ -182,15 +173,18 @@ class PerUserReport < Prawn::Document
           end
         end
 
-        move_down 15
+        move_down 10
         group do
           text_box 'Next Term Begins on: ', :size => 10, :width => 240, :at => [0, cursor], :style => :bold
           text_box 'Ends on: ', :size => 10, :width => 240, :at => [250, cursor], :style => :bold
           move_down 15
           text_box 'All students report by 5.30 p.m. on the day before the term begins in full scholl uniform.', :size => 10, :width => 500, :at => [0, cursor], :style => :bold
         end
-
+  
+        move_down 8
+        text "#{student.serial_number}",:style => :bold,:align=>:center
         start_new_page
+
       end
       # render the document
       render
@@ -199,7 +193,7 @@ class PerUserReport < Prawn::Document
    
   def teacher_remark(grade)
       if !grade.blank?
-          case grade[0].upcase
+          case grade.at(0)
 	  when "A"
 	     grades =  'Excellent'
 	  when "B"
@@ -209,10 +203,10 @@ class PerUserReport < Prawn::Document
           when "D"
 	     grades = 'Poor'
 	  else
-	     grades = "No Comment"
+	     grades = 'No Comment'
 	  end
       else
-         grades = ""
+         grades = ''
       end
       return grades 
   end
