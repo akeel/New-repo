@@ -9,7 +9,6 @@ ActionController::Routing::Routes.draw do |map|
   map.resources :attendance_reports
 
   map.report '/per_user_report/:id', :controller => 'exam', :action => 'per_user_report'
-#  map.report '/examam/:id', :controller => 'exam', :action => 'examam'
   map.feed 'courses/manage_course', :controller => 'courses' ,:action=>'manage_course'
   map.feed 'courses/manage_batches', :controller => 'courses' ,:action=>'manage_batches'
   map.resources :courses, :has_many => :batches

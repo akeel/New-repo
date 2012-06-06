@@ -4,7 +4,6 @@ development:
       database: mangu
       username: root
       password: 
-      socket: /opt/lampp/var/mysql/mysql.sock
 
 test: &test
       host: localhost
