@@ -49,15 +49,15 @@ class PerUserReport < Prawn::Document
 
     ###
      move_down 5        
-     table([["Name: #{student.first_name} #{student.middle_name} #{student.last_name}", "Admission No.: #{student.admission_no}", "Age: #{age(student.date_of_birth).to_s}"],
+     table([["Name: #{student.first_name} #{student.middle_name} #{student.last_name}", "Admission No.: #{student.admission_no}", "Expected KPCE:#{student.previous_month_marks}"],
                  ["#{@batch.course.full_name}   Term: #{@batch.name}", "Year: #{@batch.start_date.year.to_s}", "House: #{student.hostel.house if !student.hostel.nil?}"],
-                 ["Class Mean Marks: #{"%.2f" %@class_percentage}", "Student Mean Marks: #{"%.2f" %@percentage}", "Class position: #{@pos} out of #{@pos_of}"], 
-                  ["Class Mean Grade: #{@grade_class.name}", "Student Mean Grade: #{@grade_student.name}", "Form position: #{@pos2} out of #{@pos_of2}"]], :cell_style => {:border_width => 0,:size =>10 ,:width => 180}) 
+                 ["Class Mean Marks: #{"%.2f" %@class_percentage}", "Student Mean Marks: #{"%.2f" %@percentage}", ""], 
+                 ["Class Mean Grade: #{@grade_class.name}", "Student Mean Grade: #{@grade_student.name}", ""]], :cell_style => {:border_width => 0,:size =>10 ,:width => 180}) 
                
 
         # table
-        move_down 15
-        header_table = [['Subject',"Subject Position", "TERM\nMARK", "TERM\nGRADE", "EXAM\nMARK", "EXAM\nGRADE", "TEACHER'S REMARK", "TEACHER'S\nSIGN"]]
+        move_down 10
+        header_table = [['Subject', "TERM\nMARK", "TERM\nGRADE", "EXAM\nMARK", "EXAM\nGRADE","Subject Position", "TEACHER'S REMARK", "TEACHER'S\nSIGN"]]
         @cat_score_final = 0
 	@end_score_final = 0	
         @subjects.each do |s|
@@ -92,7 +92,8 @@ class PerUserReport < Prawn::Document
             else
             @grade = "-"
 	end
-        header_table += [[s.name,"#{student.current_subject_position(s.id)}" ,"#{cat_score}", "#{@grade}", "#{end_score}", "#{end_weight.blank? ? "-" : end_weight}", "#{teacher_remark(@grade)}", ""]]
+        @sub_pos,@sub_total = student.current_subject_position(s.id)
+        header_table += [[s.name ,"#{cat_score}", "#{@grade}", "#{end_score}", "#{end_weight.blank? ? "-" : end_weight}","#{@sub_pos}/#{@sub_total}" ,"#{teacher_remark(@grade)}", ""]]
         @cat_score_final += cat_score
         @end_score_final += end_score 
         end
@@ -100,80 +101,44 @@ class PerUserReport < Prawn::Document
         header_table += [["TOTAL MARKS","", @cat_score_final, "",@end_score_final, "", "#{@cat_score_final + @end_score_final} out of #{@tot_weight}", ""]]
         table header_table, :width => self.bounds.width, :cell_style => { :size => 6 }
 
-        # after table comments
-        move_down 15
-        
-        text_box 'Mean marks:', :size => 10, :width => 125, :at => [200, cursor]
-        text_box "#{'%.2f' %@percentage}", :size => 10, :width => 40, :at => [270, cursor]
-        text_box 'Mean Grade:', :size => 10, :width => 125, :at => [400, cursor]
-        text_box "#{@grade_student.name}", :size => 10, :width => 80, :at => [460, cursor]
-        
-        move_down 15
-        group do
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 70 do
-            stroke_bounds
-            move_down 7
-            text_box 'REMARKS:', :size => 10, :width => 125, :at => [20, cursor], :style => :bold
-            move_down 15
-            text_box '1.', :size => 10, :width => 10, :at => [10, cursor], :style => :bold
-            text_box 'Excellent Performance', :size => 10, :width => 150, :at => [20, cursor]
-            text_box '4.', :size => 10, :width => 10, :at => [170, cursor], :style => :bold
-            text_box 'Has Improved', :size => 10, :width => 100, :at => [180, cursor]
-            text_box '7.', :size => 10, :width => 10, :at => [290, cursor], :style => :bold
-            text_box 'Lacks Concentration', :size => 10, :width => 100, :at => [300, cursor]
-            text_box '10.', :size => 10, :width => 20, :at => [470, cursor], :style => :bold
-            text_box 'Absent', :size => 10, :width => 100, :at => [490, cursor]
-            move_down 15
-            text_box '2.', :size => 10, :width => 10, :at => [10, cursor], :style => :bold
-            text_box 'Hard Working', :size => 10, :width => 150, :at => [20, cursor]
-            text_box '5.', :size => 10, :width => 10, :at => [170, cursor], :style => :bold
-            text_box 'Can do better', :size => 10, :width => 100, :at => [180, cursor]
-            text_box '8.', :size => 10, :width => 10, :at => [290, cursor], :style => :bold
-            text_box 'Does not take corrections seriously', :size => 10, :width => 200, :at => [300, cursor]
-            move_down 15
-            text_box '3.', :size => 10, :width => 10, :at => [10, cursor], :style => :bold
-            text_box 'Takes Keen Interest', :size => 10, :width => 150, :at => [20, cursor]
-            text_box '6.', :size => 10, :width => 10, :at => [170, cursor], :style => :bold
-            text_box 'Has dropped', :size => 10, :width => 100, :at => [180, cursor]
-            text_box '9.', :size => 10, :width => 10, :at => [290, cursor], :style => :bold
-            text_box 'Not serious in assignments', :size => 10, :width => 200, :at => [300, cursor]
-          end
-        end
+       move_down 2
+       table([["Class position: #{@pos} out of #{@pos_of}","Form position: #{@pos2} out of #{@pos_of2}"]], :cell_style => {:border_width => 0,:size =>10}) 
 
-        move_down 15
+       @teacher_name = []
+       @subjects.each do |subject|
+           if !subject.employees.blank?
+              subject.employees.each do |employee|
+              name_of_emp = ""
+              name_of_emp =  name_of_emp + "#{employee.gender ?  "Mr. " : "Mrs. "}"
+              name_of_emp =  name_of_emp + "#{employee.last_name.capitalize} #{employee.first_name.at(0).capitalize}" 
+		if !@teacher_name.include?(name_of_emp)
+			@teacher_name.push(name_of_emp)
+		end
+              end
+           end
+       end
+
+       move_down 8
         group do
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 20 do
-            stroke_bounds
-            move_down 7
-            text_box 'Clubs and Games:', :size => 10, :width => 125, :at => [4, cursor], :style => :bold
-          end
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 20 do
-            stroke_bounds
-            move_down 7
-            text_box 'Responsibilities:', :size => 10, :width => 125, :at => [12, cursor], :style => :bold
-          end
-        end
-        
-	move_down 13
-        group do
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 40 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 30 do
             stroke_bounds
             move_down 7
             text_box "Class Teacher's Remarks:", :size => 10, :width => 125, :at => [5, cursor], :style => :bold
+            if !@teacher_name.blank?
+             @teacher_name.each do |teacher_name|
+             text_box teacher_name, :size => 8, :width => 125, :at => [150, cursor]
+             move_down 10
+             end
+            end
           end
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 40 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 30 do
             stroke_bounds
-            move_down 7
-            text_box "House Matron's Remarks:", :size => 10, :width => 125, :at => [5, cursor], :style => :bold
-          end
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 40 do
-            stroke_bounds
-            move_down 7
+            move_down 6
             text_box "Principal's Remarks", :size => 10, :width => 125, :at => [5, cursor], :style => :bold
           end
         end
 
-        move_down 10
+        move_down 8
         group do
           text_box 'Next Term Begins on: ', :size => 10, :width => 240, :at => [0, cursor], :style => :bold
           text_box 'Ends on: ', :size => 10, :width => 240, :at => [250, cursor], :style => :bold
@@ -181,10 +146,48 @@ class PerUserReport < Prawn::Document
           text_box 'All students report by 5.30 p.m. on the day before the term begins in full scholl uniform.', :size => 10, :width => 500, :at => [0, cursor], :style => :bold
         end
   
-        move_down 8
-        text "#{student.serial_number}",:style => :bold,:align=>:center
+
+        line [30, 20],[30,220]
+        stroke
+        line [30, 20],[530,20]
+        stroke
+        
+        text_box "0" ,:at=>[30,25]
+        text_box "20" ,:at=>[30,65]
+        text_box "40" ,:at=>[30,105]
+        text_box "60" ,:at=>[30,145]
+        text_box "80" ,:at=>[30,185]
+        text_box "100" ,:at=>[30,225]
+
+        
+
+
+#       Term1    
+        line [130, 140],[230,180]
+        stroke
+        line [230, 180],[330,90]
+        stroke
+        line [330,90],[430,180]
+        stroke
+        line [430,180],[530,150]
+        stroke
+
+#       Term2    
+        line [130, 180],[230,160]
+        stroke
+        line [230, 160],[330,64]
+        stroke
+        line [330,64],[430,77]
+        stroke
+        line [430,77],[530,88]
+        stroke
+
+        text_box "#{student.serial_number}",:style => :bold,:at=>[250,10],:size=>10
+
+
         start_new_page
 
+ 
       end
       # render the document
       render

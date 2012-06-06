@@ -431,7 +431,8 @@ class Student < ActiveRecord::Base
     	end
     end
     position = hash_new[self.id]
-    return position
+    out_of  =  hash_new.size
+    return position,out_of
  end 
  
  
