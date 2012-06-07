@@ -34,4 +34,14 @@ class Subject < ActiveRecord::Base
     update_attribute(:is_deleted, true)
   end
 
+  def teacher_initial_name
+      name_of_emp = ""
+      if !self.employees.blank?
+          employee = self.employees.first
+          name_of_emp =  name_of_emp + "#{employee.gender ?  "Mr. " : "Mrs. "}"
+          name_of_emp =  name_of_emp + "#{employee.last_name.capitalize} #{employee.first_name.at(0).capitalize} ."
+      end
+      return name_of_emp
+  end
+
 end
