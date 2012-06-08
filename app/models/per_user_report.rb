@@ -34,22 +34,28 @@ class PerUserReport < Prawn::Document
         #report header
         image "#{RAILS_ROOT}/public/images/report_logo.jpg", :scale => 0.4
         student_image = "#{student.photo.path(:thumb)}" if !student.photo_file_name.nil?
-        bounding_box [30, 705], :width => 420, :height => 110 do
-          text_box 'MANGU HIGH SCHOOL', :size => 22, :width => 350, :at => [105, cursor], :style => :bold
-          move_down 35
-          text_box 'P.O BOX 314- 01000 THIKA TEL 25420 2319804', :size => 13, :width => 420, :at => [80, cursor]
-          move_down 35
+        bounding_box [30, 720], :width => 420, :height => 130 do
+          text_box 'MANG\'U HIGH SCHOOL', :size => 22, :width => 350, :at => [95, cursor], :style => :bold
+          move_down 25
+          text_box 'P.O BOX 314- 01000, THIKA ', :size => 18, :at => [95, cursor], :style => :bold
+          move_down 20
+          text_box 'TEL:067-24146,24267', :size => 12, :at => [95, cursor]
+          move_down 16
+          text_box 'Email:info@manguhigh.com', :size => 12, :at => [95, cursor]
+          move_down 16
+          text_box 'Website:www.manguhigh.com', :size => 12, :at => [95, cursor]
+          move_down 22
           text_box 'PROGRESS REPORT FORM', :size => 20, :width => 350, :at => [90, cursor]
         end
         image student_image,:at=>[400,715] if !student_image.nil?
 
     ### watermark
-        text_box "<color rgb='FF00FF'>#{student.serial_number}</color>", :size => 22,:at=>[200,300],:rotate=>45,:inline_format => true
+        text_box "<color rgb='FF00FF'>#{student.serial_number}</color>", :size => 28,:at=>[200,300],:rotate=>45,:inline_format => true
 
 
     ###
      move_down 5        
-     table([["Name: #{student.first_name} #{student.middle_name} #{student.last_name}", "Admission No.: #{student.admission_no}", "Expected KPCE:#{student.previous_month_marks}"],
+     table([["Name: #{student.first_name} #{student.middle_name} #{student.last_name}", "Admission No.: #{student.admission_no}", "KPCE MARKS:#{student.previous_month_marks}"],
                  ["#{@batch.course.full_name}   Term: #{@batch.name}", "Year: #{@batch.start_date.year.to_s}", "House: #{student.hostel.house if !student.hostel.nil?}"],
                  ["Class Mean Marks: #{"%.2f" %@class_percentage}", "Student Mean Marks: #{"%.2f" %@percentage}", ""], 
                  ["Class Mean Grade: #{@grade_class.name}", "Student Mean Grade: #{@grade_student.name}", ""]], :cell_style => {:border_width => 0,:size =>10 ,:width => 180}) 
@@ -57,7 +63,7 @@ class PerUserReport < Prawn::Document
 
         # table
         move_down 10
-        header_table = [['Subject', "AVERAGE CAT MARKS\n( out of 40)", "END TERM MARK\n(out of 60)", "TOTAL SCORE\n(out of 100)", "EXAM\nGRADE","Subject Position", "TEACHER'S REMARK", "TEACHER'S\nINITIAL"]]
+        header_table = [['<b>SUBJECT</b>', "<b>AVERAGE CAT\n MARKS</b>( out of 40)", "<b>END TERM\n MARKS (out of 60)</b>", "<b>TOTAL SCORE\n(out of 100)</b>", "<b>EXAM\nGRADE</b>","<b>SUBJECT POSITION</b>", "<b>TEACHER'S REMARK</b>", "<b>TEACHER'S INITIAL</b>"]]
 
         @final_exam_score = 0.0
         @final_exam_score_total = 0.0 
@@ -150,8 +156,8 @@ class PerUserReport < Prawn::Document
  
 
         
-        header_table += [["TOTALS","","","#{@final_exam_score} out of #{@final_exam_score_total}", "#{@final_mean_grade}","", "", ""]]
-        table header_table, :width => self.bounds.width, :cell_style => { :size => 6 }
+        header_table += [["<b>TOTALS</b>","","","<b>#{@final_exam_score}</b> out\nof <b>#{@final_exam_score_total}/<b>", "<b>#{@final_mean_grade}</b>","", "", ""]]
+        table header_table, :width => self.bounds.width, :cell_style => { :size => 6,:inline_format => true }
 
        move_down 2
        table([["Class position: #{@pos} out of #{@pos_of}","Form position: #{@pos2} out of #{@pos_of2}"]], :cell_style => {:border_width => 0,:size =>10}) 
@@ -159,15 +165,15 @@ class PerUserReport < Prawn::Document
    
        move_down 8
         group do
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 30 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 50 do
             stroke_bounds
             move_down 7
-            text_box "Class Teacher's Remarks:", :size => 10, :width => 125, :at => [5, cursor], :style => :bold
+            text_box "Class Teacher's Remarks:", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
           end
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 30 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 50 do
             stroke_bounds
             move_down 6
-            text_box "Principal's Remarks", :size => 10, :width => 125, :at => [5, cursor], :style => :bold
+            text_box "Principal's Remarks", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
           end
         end
 
@@ -182,7 +188,7 @@ class PerUserReport < Prawn::Document
 
         line [30, 20],[30,120]
         stroke
-        line [30, 20],[530,20]
+        line [30, 20],[390,20]
         stroke
         
         text_box "0" ,:at=>[10,25]
@@ -193,26 +199,26 @@ class PerUserReport < Prawn::Document
         text_box "100" ,:at=>[10,125]
      
 
-        text_box "F1-1" ,:at=>[70,15]
-        text_box "F1-2" ,:at=>[110,15]
-        text_box "F1-3" ,:at=>[150,15]
-        text_box "F2-1" ,:at=>[190,15]
-        text_box "F2-2" ,:at=>[230,15]
-        text_box "F2-3" ,:at=>[270,15]
-        text_box "F3-1" ,:at=>[310,15]
-        text_box "F3-2" ,:at=>[350,15]
-        text_box "F3-3" ,:at=>[390,15]
-        text_box "F4-1" ,:at=>[430,15]
-        text_box "F4-2" ,:at=>[470,15]
-        text_box "F4-3" ,:at=>[510,15]
+        text_box "F1-1" ,:at=>[55,15], :size => 8
+        text_box "F1-2" ,:at=>[85,15], :size => 8
+        text_box "F1-3" ,:at=>[115,15], :size => 8
+        text_box "F2-1" ,:at=>[145,15], :size => 8
+        text_box "F2-2" ,:at=>[175,15], :size => 8
+        text_box "F2-3" ,:at=>[205,15], :size => 8
+        text_box "F3-1" ,:at=>[235,15], :size => 8
+        text_box "F3-2" ,:at=>[265,15], :size => 8
+        text_box "F3-3" ,:at=>[295,15], :size => 8
+        text_box "F4-1" ,:at=>[325,15], :size => 8
+        text_box "F4-2" ,:at=>[355,15], :size => 8
+        text_box "F4-3" ,:at=>[385,15], :size => 8
 
 
   
 #        Term1    
-         line [70, 80],[110,100]
+         line [55, 80],[85,100]
          stroke
  
-         line [110, 100],[150,60]
+         line [85, 100],[115,60]
          stroke
 
         
