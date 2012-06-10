@@ -20,7 +20,10 @@
 
 <% @batch.each do |batch| %>
     <div class="link-box">
-      <div class="link-heading"><%= link_to batch.full_name, "/per_user_report/#{batch.id}" %>  </div>
+      <div class="link-heading">
+       <%= link_to(batch.full_name,"/per_user_report/#{batch.id}", {:onclick=>"Element.show('loader_'+#{batch.id})"}) %>
+        <%= image_tag("loader.gif", :align => "absmiddle", :border => 0, :id => "loader_#{batch.id}", :style =>"display: none;") %>
+ 
     </div>
 <% end %>
 

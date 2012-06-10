@@ -8,7 +8,7 @@ class PerUserReport < Prawn::Document
     @batch = Batch.find id	
     @exam_groups = ExamGroup.find_all_by_batch_id(@batch.id)
     @mean_mark_class = @batch.class_mean_marks*100
-    @students = [@batch.students.first]
+    @students = @batch.students
     if @batch
       @students.each do |student|
       @subjects = student.subjects         
@@ -193,6 +193,7 @@ class PerUserReport < Prawn::Document
         text_box "0" ,:at=>[30,25]
         text_box "20" ,:at=>[30,45]
         text_box "40" ,:at=>[30,65]
+        text_box "------------------------------------------------------------" ,:at=>[50,75]
         text_box "60" ,:at=>[30,85]
         text_box "80" ,:at=>[30,105]
         text_box "100" ,:at=>[30,125]
@@ -214,10 +215,10 @@ class PerUserReport < Prawn::Document
 
   
 #        Term1    
-         line [70, 60],[90,60]
+         line [70, 60],[90,40]
          stroke
  
-         line [90, 100],[110,60]
+         line [90, 40],[110,100]
          stroke
 
 
