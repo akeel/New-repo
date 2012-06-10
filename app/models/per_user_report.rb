@@ -8,7 +8,7 @@ class PerUserReport < Prawn::Document
     @batch = Batch.find id	
     @exam_groups = ExamGroup.find_all_by_batch_id(@batch.id)
     @mean_mark_class = @batch.class_mean_marks*100
-    @students = @batch.students
+    @students = [@batch.students.first]
     if @batch
       @students.each do |student|
       @subjects = student.subjects         
@@ -41,9 +41,9 @@ class PerUserReport < Prawn::Document
           move_down 20
           text_box 'TEL:067-24146,24267', :size => 12, :at => [95, cursor]
           move_down 16
-          text_box 'Email:info@manguhigh.com', :size => 12, :at => [95, cursor]
+          text_box '<i>Email:info@manguhigh.com</i>', :size => 12, :at => [95, cursor],:inline_format => true
           move_down 16
-          text_box 'Website:www.manguhigh.com', :size => 12, :at => [95, cursor]
+          text_box '<i>Website:www.manguhigh.com</i>', :size => 12, :at => [95, cursor],:inline_format => true
           move_down 22
           text_box 'PROGRESS REPORT FORM', :size => 20, :width => 350, :at => [90, cursor]
         end
@@ -52,18 +52,17 @@ class PerUserReport < Prawn::Document
     ### watermark
         text_box "<color rgb='FF00FF'>#{student.serial_number}</color>", :size => 28,:at=>[200,300],:rotate=>45,:inline_format => true
 
-
     ###
      move_down 5        
-     table([["Name: #{student.first_name} #{student.middle_name} #{student.last_name}", "Admission No.: #{student.admission_no}", "KPCE MARKS:#{student.previous_month_marks}"],
-                 ["#{@batch.course.full_name}   Term: #{@batch.name}", "Year: #{@batch.start_date.year.to_s}", "House: #{student.hostel.house if !student.hostel.nil?}"],
+     table([["Name: #{student.first_name.to_s.upcase} #{student.middle_name.to_s.upcase} #{student.last_name.to_s.upcase}", "Admission No.: #{student.admission_no}", "KCPE MARKS:#{student.previous_month_marks}"],
+                 ["#{@batch.course.full_name}   Term: #{@batch.name}", "Year: #{@batch.start_date.year.to_s}", "House: #{student.hostel.house.upcase if !student.hostel.nil?}"],
                  ["Class Mean Marks: #{"%.2f" %@class_percentage}", "Student Mean Marks: #{"%.2f" %@percentage}", ""], 
                  ["Class Mean Grade: #{@grade_class.name}", "Student Mean Grade: #{@grade_student.name}", ""]], :cell_style => {:border_width => 0,:size =>10 ,:width => 180}) 
                
 
         # table
         move_down 10
-        header_table = [['<b>SUBJECT</b>', "<b>AVERAGE CAT\n MARKS</b>( out of 40)", "<b>END TERM\n MARKS (out of 60)</b>", "<b>TOTAL SCORE\n(out of 100)</b>", "<b>EXAM\nGRADE</b>","<b>SUBJECT POSITION</b>", "<b>TEACHER'S REMARK</b>", "<b>TEACHER'S INITIAL</b>"]]
+        header_table = [['<b>SUBJECT   </b>', "<b>AVERAGE CAT\n MARKS</b>( out of 40)", "<b>END TERM\n MARKS (out of 60)</b>", "<b>TOTAL SCORE\n(out of 100)</b>", "<b>EXAM\nGRADE</b>","<b>SUBJECT POSITION</b>", "<b>TEACHER'S REMARK</b>", "<b>TEACHER'S\nINITIAL</b>"]]
 
         @final_exam_score = 0.0
         @final_exam_score_total = 0.0 
@@ -141,7 +140,7 @@ class PerUserReport < Prawn::Document
          
         #end
         @sub_pos,@sub_total = student.current_subject_position(s.id)
-        header_table += [[s.name ,"#{cal_twenty_percent}", "#{end_sixty_percent}", "#{total_exam_score}", "#{@total_grade}","#{@sub_pos}/#{@sub_total}" ,"#{teacher_remark(@total_grade)}", s.teacher_initial_name]]
+        header_table += [["<b>#{s.name}</b>" ,"#{cal_twenty_percent.round(0)}", "#{end_sixty_percent.round(0)}", "#{total_exam_score.round(0)}", "#{@total_grade}","#{@sub_pos}/#{@sub_total}" ,"#{teacher_remark(@total_grade)}", "<b>#{s.teacher_initial_name}</b>"]]
         @cat_score_final += cat_score
         @end_score_final += end_score 
         end
@@ -156,21 +155,21 @@ class PerUserReport < Prawn::Document
  
 
         
-        header_table += [["<b>TOTALS</b>","","","<b>#{@final_exam_score}</b> out\nof <b>#{@final_exam_score_total}/<b>", "<b>#{@final_mean_grade}</b>","", "", ""]]
-        table header_table, :width => self.bounds.width, :cell_style => { :size => 6,:inline_format => true }
+        header_table += [["<b>TOTALS</b>","","","<b>#{@final_exam_score.round(0)}</b> out\nof <b>#{@final_exam_score_total}<b>", "<b>#{@final_mean_grade}</b>","", "", ""]]
+        table header_table, :width => self.bounds.width, :cell_style => { :size => 5,:inline_format => true }
 
        move_down 2
-       table([["Class position: #{@pos} out of #{@pos_of}","Form position: #{@pos2} out of #{@pos_of2}"]], :cell_style => {:border_width => 0,:size =>10}) 
+       table([["Class position: <b>#{@pos}</b> out of <b>#{@pos_of}</b>","Form position: <b>#{@pos2}</b> out of <b>#{@pos_of2}</b>"]], :cell_style => {:border_width => 0,:size =>10,:inline_format => true}) 
 
    
        move_down 8
         group do
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 50 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 64 do
             stroke_bounds
             move_down 7
             text_box "Class Teacher's Remarks:", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
           end
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 50 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 64 do
             stroke_bounds
             move_down 6
             text_box "Principal's Remarks", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
@@ -186,40 +185,42 @@ class PerUserReport < Prawn::Document
         end
   
 
-        line [30, 20],[30,120]
+        line [50, 20],[50,120]
         stroke
-        line [30, 20],[390,20]
+        line [50, 20],[290,20]
         stroke
         
-        text_box "0" ,:at=>[10,25]
-        text_box "20" ,:at=>[10,45]
-        text_box "40" ,:at=>[10,65]
-        text_box "60" ,:at=>[10,85]
-        text_box "80" ,:at=>[10,105]
-        text_box "100" ,:at=>[10,125]
+        text_box "0" ,:at=>[30,25]
+        text_box "20" ,:at=>[30,45]
+        text_box "40" ,:at=>[30,65]
+        text_box "60" ,:at=>[30,85]
+        text_box "80" ,:at=>[30,105]
+        text_box "100" ,:at=>[30,125]
      
 
-        text_box "F1-1" ,:at=>[55,15], :size => 8
-        text_box "F1-2" ,:at=>[85,15], :size => 8
-        text_box "F1-3" ,:at=>[115,15], :size => 8
-        text_box "F2-1" ,:at=>[145,15], :size => 8
-        text_box "F2-2" ,:at=>[175,15], :size => 8
-        text_box "F2-3" ,:at=>[205,15], :size => 8
-        text_box "F3-1" ,:at=>[235,15], :size => 8
-        text_box "F3-2" ,:at=>[265,15], :size => 8
-        text_box "F3-3" ,:at=>[295,15], :size => 8
-        text_box "F4-1" ,:at=>[325,15], :size => 8
-        text_box "F4-2" ,:at=>[355,15], :size => 8
-        text_box "F4-3" ,:at=>[385,15], :size => 8
+        text_box "F1-1" ,:at=>[65,15], :size => 6
+        text_box "F1-2" ,:at=>[85,15], :size => 6
+        text_box "F1-3" ,:at=>[105,15], :size => 6
+        text_box "F2-1" ,:at=>[125,15], :size => 6
+        text_box "F2-2" ,:at=>[145,15], :size => 6
+        text_box "F2-3" ,:at=>[165,15], :size => 6
+        text_box "F3-1" ,:at=>[185,15], :size => 6
+        text_box "F3-2" ,:at=>[205,15], :size => 6
+        text_box "F3-3" ,:at=>[225,15], :size => 6
+        text_box "F4-1" ,:at=>[245,15], :size => 6
+        text_box "F4-2" ,:at=>[265,15], :size => 6
+        text_box "F4-3" ,:at=>[285,15], :size => 6
 
 
   
 #        Term1    
-         line [55, 80],[85,100]
+         line [70, 60],[90,60]
          stroke
  
-         line [85, 100],[115,60]
+         line [90, 100],[110,60]
          stroke
+
+
 
         
 
@@ -257,15 +258,13 @@ class PerUserReport < Prawn::Document
       if !grade.blank?
           case grade.at(0)
 	  when "A"
-	     grades =  'Excellent'
+	     grades =  'Vizuri'
 	  when "B"
-	     grades = 'Good'
+	     grades = 'Bora'
 	  when "C"
-	     grades = 'average'
+	     grades = 'Wastani'
           when "D"
-	     grades = 'Poor'
-	  else
-	     grades = 'No Comment'
+	     grades = 'Duni'
 	  end
       else
          grades = ''
