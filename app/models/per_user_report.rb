@@ -37,7 +37,7 @@ class PerUserReport < Prawn::Document
         bounding_box [30, 720], :width => 420, :height => 130 do
           text_box 'MANG\'U HIGH SCHOOL', :size => 22, :width => 350, :at => [95, cursor], :style => :bold
           move_down 25
-          text_box 'P.O BOX 314- 01000, THIKA ', :size => 18, :at => [95, cursor], :style => :bold
+          text_box 'P.O BOX 314- 01000, THIKA ', :size => 18, :at => [95, cursor]
           move_down 20
           text_box 'TEL:067-24146,24267', :size => 12, :at => [95, cursor]
           move_down 16
@@ -140,7 +140,7 @@ class PerUserReport < Prawn::Document
          
         #end
         @sub_pos,@sub_total = student.current_subject_position(s.id)
-        header_table += [["<b>#{s.name}</b>" ,"#{cal_twenty_percent.round(0)}", "#{end_sixty_percent.round(0)}", "#{total_exam_score.round(0)}", "#{@total_grade}","#{@sub_pos}/#{@sub_total}" ,"#{teacher_remark(@total_grade)}", "<b>#{s.teacher_initial_name}</b>"]]
+        header_table += [["<b>#{s.name}</b>" ,"#{cal_twenty_percent.ceil}", "#{end_sixty_percent.ceil}", "#{total_exam_score.ceil}", "#{@total_grade}","#{@sub_pos}/#{@sub_total}" ,"#{teacher_remark(@total_grade,s)}", "<b>#{s.teacher_initial_name}</b>"]]
         @cat_score_final += cat_score
         @end_score_final += end_score 
         end
@@ -155,7 +155,7 @@ class PerUserReport < Prawn::Document
  
 
         
-        header_table += [["<b>TOTALS</b>","","","<b>#{@final_exam_score.round(0)}</b> out\nof <b>#{@final_exam_score_total}<b>", "<b>#{@final_mean_grade}</b>","", "", ""]]
+        header_table += [["<b>TOTALS</b>","","","<b>#{@final_exam_score.ceil}</b> out\nof <b>#{@final_exam_score_total}<b>", "<b>#{@final_mean_grade}</b>","", "", ""]]
         table header_table, :width => self.bounds.width, :cell_style => { :size => 5,:inline_format => true }
 
        move_down 2
@@ -255,17 +255,19 @@ class PerUserReport < Prawn::Document
     end
   end
    
-  def teacher_remark(grade)
+  def teacher_remark(grade,subject)
       if !grade.blank?
           case grade.at(0)
 	  when "A"
-	     grades =  'Vizuri'
+	     grades =  subject.name.to_s == "KISWAHILI" ?  'Vizuri' : "Excellent"
 	  when "B"
-	     grades = 'Bora'
+	     grades =  subject.name.to_s == "KISWAHILI" ?  'Bora' : "Good" 
 	  when "C"
-	     grades = 'Wastani'
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Wastani' : "Average"
           when "D"
-	     grades = 'Duni'
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Duni' : "Poor"
+          when "E"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Duni' : "Poor"
 	  end
       else
          grades = ''

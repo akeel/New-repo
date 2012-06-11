@@ -377,7 +377,7 @@ class Student < ActiveRecord::Base
       if !self.student_previous_subject_marks.blank?
           markes = self.student_previous_subject_marks.sum(:mark)
       end
-      return markes
+      return markes.ceil
  end
 
   def current_class_position
