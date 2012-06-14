@@ -9,6 +9,7 @@ class PerUserReport < Prawn::Document
     @exam_groups = ExamGroup.find_all_by_batch_id(@batch.id)
     @mean_mark_class = @batch.class_mean_marks*100
     @students = @batch.students
+
     if @batch
       @students.each do |student|
       @subjects = student.subjects         
@@ -23,8 +24,15 @@ class PerUserReport < Prawn::Document
         @marks_total += exam_group.total_marks(student)[0]
     		end
     	end
+
+      course = @batch.course
+      @form_mean_marks = course[student]
+      @form_mean_marks = 0.0 if @form_mean_marks.nil?
+      @grade_form = !@form_mean_marks.nil? ?  GradingLevel.percentage_to_grade(@form_mean_marks,nil) : GradingLevel.percentage_to_grade(0.0,nil)
+      
       @tot_weight = @total_wt * @subjects.size
       @class_percentage = @tot_weight > 0  ?  @mean_mark_class/@tot_weight : 0 
+      
       @percentage = (@marks_total*100/@max_total.to_f)  unless @max_total==0
       @percentage = 0 if @percentage.nil?
       @grade_class = GradingLevel.percentage_to_grade(@class_percentage,nil)
@@ -37,8 +45,8 @@ class PerUserReport < Prawn::Document
         bounding_box [30, 720], :width => 420, :height => 130 do
           text_box 'MANG\'U HIGH SCHOOL', :size => 22, :width => 350, :at => [95, cursor], :style => :bold
           move_down 25
-          text_box 'P.O BOX 314- 01000, THIKA ', :size => 18, :at => [95, cursor]
-          move_down 20
+          text_box 'P.O BOX 314- 01000, THIKA ', :size => 12, :at => [95, cursor]
+          move_down 16
           text_box 'TEL:067-24146,24267', :size => 12, :at => [95, cursor]
           move_down 16
           text_box '<i>Email:info@manguhigh.com</i>', :size => 12, :at => [95, cursor],:inline_format => true
@@ -47,6 +55,8 @@ class PerUserReport < Prawn::Document
           move_down 22
           text_box 'PROGRESS REPORT FORM', :size => 20, :width => 350, :at => [90, cursor]
         end
+
+
         image student_image,:at=>[400,715] if !student_image.nil?
 
     ### watermark
@@ -56,13 +66,13 @@ class PerUserReport < Prawn::Document
      move_down 5        
      table([["Name: #{student.first_name.to_s.upcase} #{student.middle_name.to_s.upcase} #{student.last_name.to_s.upcase}", "Admission No.: #{student.admission_no}", "KCPE MARKS:#{student.previous_month_marks}"],
                  ["#{@batch.course.full_name}   Term: #{@batch.name}", "Year: #{@batch.start_date.year.to_s}", "House: #{student.hostel.house.upcase if !student.hostel.nil?}"],
-                 ["Class Mean Marks: #{"%.2f" %@class_percentage}", "Student Mean Marks: #{"%.2f" %@percentage}", ""], 
-                 ["Class Mean Grade: #{@grade_class.name}", "Student Mean Grade: #{@grade_student.name}", ""]], :cell_style => {:border_width => 0,:size =>10 ,:width => 180}) 
-               
+                 ["Class Mean Marks: #{"%.2f" %@class_percentage}", "Student Mean Marks: #{"%.2f" %@percentage}", "Form Mean Marks: #{"%.2f" %@form_mean_marks}"], 
+                 ["Class Mean Grade: #{@grade_class.name}", "Student Mean Grade: #{@grade_student.name}", "Form Mean Grade: #{@grade_form.name}"]], :cell_style => {:border_width => 0,:size =>10 ,:width => 180}) 
 
+ 
         # table
         move_down 10
-        header_table = [['<b>SUBJECT   </b>', "<b>AVERAGE CAT\n MARKS</b>( out of 40)", "<b>END TERM\n MARKS (out of 60)</b>", "<b>TOTAL SCORE\n(out of 100)</b>", "<b>EXAM\nGRADE</b>","<b>SUBJECT POSITION</b>", "<b>TEACHER'S REMARK</b>", "<b>TEACHER'S\nINITIAL</b>"]]
+        header_table = [['<b>SUBJECT   </b>', "<b>AVERAGE CAT\n MARKS( out of 40)</b>", "<b>END TERM\n MARKS (out of 60)</b>", "<b>TOTAL SCORE\n(out of 100)</b>", "<b>EXAM\nGRADE</b>","<b>SUBJECT POSITION</b>", "<b>TEACHER'S REMARK</b>", "<b>TEACHER'S\nINITIAL</b>"]]
 
         @final_exam_score = 0.0
         @final_exam_score_total = 0.0 
@@ -156,95 +166,92 @@ class PerUserReport < Prawn::Document
 
         
         header_table += [["<b>TOTALS</b>","","","<b>#{@final_exam_score.ceil}</b> out\nof <b>#{@final_exam_score_total}<b>", "<b>#{@final_mean_grade}</b>","", "", ""]]
-        table header_table, :width => self.bounds.width, :cell_style => { :size => 5,:inline_format => true }
+        table header_table, :width => self.bounds.width, :cell_style => {:size => 6,:inline_format => true } do
+             columns(0).width = 70
+        end
 
        move_down 2
        table([["Class position: <b>#{@pos}</b> out of <b>#{@pos_of}</b>","Form position: <b>#{@pos2}</b> out of <b>#{@pos_of2}</b>"]], :cell_style => {:border_width => 0,:size =>10,:inline_format => true}) 
 
-   
-       move_down 8
+    
+  
+
+        line [50, 180],[50,280]
+        stroke
+        line [50, 180],[290,180]
+        stroke
+
+
+        text_box "0" ,:at=>[30,180], :size => 6
+        text_box "E" ,:at=>[30,200], :size => 6
+        text_box "D" ,:at=>[30,220], :size => 6
+        text_box "------------------------------------------------------------" ,:at=>[50,235]
+        text_box "C" ,:at=>[30,240], :size => 6
+        text_box "B" ,:at=>[30,260], :size => 6
+        text_box "A" ,:at=>[30,280], :size => 6
+
+
+        text_box "F1-1" ,:at=>[65,175], :size => 5
+        text_box "F1-2" ,:at=>[85,175], :size => 5
+        text_box "F1-3" ,:at=>[105,175], :size => 5
+        text_box "F2-1" ,:at=>[125,175], :size => 5
+        text_box "F2-2" ,:at=>[145,175], :size => 5
+        text_box "F2-3" ,:at=>[165,175], :size => 5
+        text_box "F3-1" ,:at=>[185,175], :size => 5
+        text_box "F3-2" ,:at=>[205,175], :size => 5
+        text_box "F3-3" ,:at=>[225,175], :size => 5
+        text_box "F4-1" ,:at=>[245,175], :size => 5
+        text_box "F4-2" ,:at=>[265,175], :size => 5
+        text_box "F4-3" ,:at=>[285,175], :size => 5
+
+
+         line [70, 240],[90,220]
+         stroke
+
+         line [90, 220],[110,280]
+         stroke
+
+
+        move_down 135
         group do
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 64 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 32 do
             stroke_bounds
             move_down 7
             text_box "Class Teacher's Remarks:", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
           end
-          bounding_box [0, cursor], :width => self.bounds.width, :height => 64 do
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 32 do
+            stroke_bounds
+            move_down 6
+            text_box "Class Teacher's signature:", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
+          end
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 32 do
             stroke_bounds
             move_down 6
             text_box "Principal's Remarks", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
           end
+          bounding_box [0, cursor], :width => self.bounds.width, :height => 32 do
+            stroke_bounds
+            move_down 6
+            text_box "Principal's signature", :size => 10, :width => 140, :at => [5, cursor], :style => :bold
+          end
         end
 
-        move_down 8
+        move_down 6
         group do
           text_box 'Next Term Begins on: ', :size => 10, :width => 240, :at => [0, cursor], :style => :bold
           text_box 'Ends on: ', :size => 10, :width => 240, :at => [250, cursor], :style => :bold
-          move_down 15
-          text_box 'All students report by 5.30 p.m. on the day before the term begins in full scholl uniform.', :size => 10, :width => 500, :at => [0, cursor], :style => :bold
         end
-  
-
-        line [50, 20],[50,120]
-        stroke
-        line [50, 20],[290,20]
-        stroke
         
-        text_box "0" ,:at=>[30,25]
-        text_box "20" ,:at=>[30,45]
-        text_box "40" ,:at=>[30,65]
-        text_box "------------------------------------------------------------" ,:at=>[50,75]
-        text_box "60" ,:at=>[30,85]
-        text_box "80" ,:at=>[30,105]
-        text_box "100" ,:at=>[30,125]
-     
-
-        text_box "F1-1" ,:at=>[65,15], :size => 6
-        text_box "F1-2" ,:at=>[85,15], :size => 6
-        text_box "F1-3" ,:at=>[105,15], :size => 6
-        text_box "F2-1" ,:at=>[125,15], :size => 6
-        text_box "F2-2" ,:at=>[145,15], :size => 6
-        text_box "F2-3" ,:at=>[165,15], :size => 6
-        text_box "F3-1" ,:at=>[185,15], :size => 6
-        text_box "F3-2" ,:at=>[205,15], :size => 6
-        text_box "F3-3" ,:at=>[225,15], :size => 6
-        text_box "F4-1" ,:at=>[245,15], :size => 6
-        text_box "F4-2" ,:at=>[265,15], :size => 6
-        text_box "F4-3" ,:at=>[285,15], :size => 6
-
-
-  
-#        Term1    
-         line [70, 60],[90,40]
-         stroke
- 
-         line [90, 40],[110,100]
-         stroke
+        move_down 12
+        group do
+          text_box "#{student.serial_number}", :size => 10, :at => [275, cursor], :style => :bold
+        end
 
 
 
         
 
 
-# #       Term1    
-#         line [130, 140],[230,180]
-#         stroke
-#         line [230, 180],[330,90]
-#         stroke
-#         line [330,90],[430,180]
-#         stroke
-#         line [430,180],[530,150]
-#         stroke
-# 
-# #       Term2    
-#         line [130, 180],[230,160]
-#         stroke
-#         line [230, 160],[330,64]
-#         stroke
-#         line [330,64],[430,77]
-#         stroke
-#         line [430,77],[530,88]
-#         stroke
 
         start_new_page
 
@@ -257,17 +264,31 @@ class PerUserReport < Prawn::Document
    
   def teacher_remark(grade,subject)
       if !grade.blank?
-          case grade.at(0)
+          case grade
 	  when "A"
-	     grades =  subject.name.to_s == "KISWAHILI" ?  'Vizuri' : "Excellent"
+	     grades =  subject.name.to_s == "KISWAHILI" ?  'Hongera' : "Excellent"
+          when "A-"
+	     grades =  subject.name.to_s == "KISWAHILI" ?  'Vizuri sana' : "Very good"
+          when "B+"
+	     grades =  subject.name.to_s == "KISWAHILI" ?  'Kazi Nzuri' : "Good Work"
 	  when "B"
-	     grades =  subject.name.to_s == "KISWAHILI" ?  'Bora' : "Good" 
-	  when "C"
-	     grades = subject.name.to_s == "KISWAHILI" ?  'Wastani' : "Average"
+             grades =  subject.name.to_s == "KISWAHILI" ?  'Vizuri. Jitahidi.' : "Good. Aim Higher."
+          when "B-"
+	     grades =  subject.name.to_s == "KISWAHILI" ?  'Vizuri. Jitahidi.' : "Good. Aim Higher." 
+	  when "C+"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Jitahidi Zaidi' : "Fair. Aim Higher."
+          when "C"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Wastani. Jitahidi.' : "Fair. Work Harder."
+          when "C-"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Wastani. Jitahidi.' : "Fair. Work Harder."
+          when "D+"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Jitahidi' : "Work Harder"
           when "D"
-	     grades = subject.name.to_s == "KISWAHILI" ?  'Duni' : "Poor"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Jitahidi' : "Work Harder"
+          when "D-"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Jitahidi' : "Work Harder"
           when "E"
-	     grades = subject.name.to_s == "KISWAHILI" ?  'Duni' : "Poor"
+	     grades = subject.name.to_s == "KISWAHILI" ?  'Lazima Utie Bidii' : "Poor. Must Work!"
 	  end
       else
          grades = ''

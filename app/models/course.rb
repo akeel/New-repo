@@ -80,7 +80,7 @@ class Course < ActiveRecord::Base
  	 end
  	 
  	 
- 	 def form_top
+   def form_top
     hash = Hash.new
     batch = Batch.find_by_course_id(self.id)
     students = batch.students 
@@ -89,7 +89,7 @@ class Course < ActiveRecord::Base
         hash[std] = marks 
       end
     	return hash
- 		end
+    end
  	 
  	 
  	 
