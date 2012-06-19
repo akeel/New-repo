@@ -86,7 +86,7 @@
         <td class="col-1">
          <div class="label-field-pair2">
         <div class="text-input-bg2">
-        <%= exam_form.check_box :_delete %>
+        <%= exam_form.check_box :_destroy %>
         </div>
         </div>
         </td>
@@ -101,5 +101,4 @@
 <script>
   $('additional_exam_group_maximum_marks').observe('blur', function() { $$('.max_marks')      .each(function(max_marks_obj){ max_marks_obj.value = $F('additional_exam_group_maximum_marks'); }); });
   $('additional_exam_group_minimum_marks').observe('blur', function() { $$('.min_marks')      .each(function(min_marks_obj){ min_marks_obj.value = $F('additional_exam_group_minimum_marks'); }); });
-  $('additional_exam_group_weightage').observe('blur', function() { $$('.weightage')      .each(function(min_marks_obj){ min_marks_obj.value = $F('additional_exam_group_weightage'); }); });
 </script>

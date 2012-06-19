@@ -119,7 +119,6 @@
       <hr class="label-underline"></hr>
 
       <div id="admission1_form_vertical_block_left">
-
         <div class="label-field-pair">
           <label for="student_grade">Course & Batch</label>
           <div class="text-input-bg"><%= select :student, :batch_id, Batch.active.map {|b| [b.full_name, b.id]} %></div>

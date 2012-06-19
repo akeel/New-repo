@@ -22,9 +22,9 @@
 
 <table width="700">
   <tr class="odd left"><td>Joining date</td><td class="right"><%= @employee.joining_date.strftime("%d %b,%Y")%></td></tr>
-  <tr class="even left"><td>Department</td><td class="right"><%= @employee.employee_department.name%></td></tr>
-  <tr class="odd left"><td>Category</td><td class="right"><%= @employee.employee_category.name %></td></tr>
-  <tr class="even left"><td>Position</td><td class="right"><%= @employee.employee_position.name %></td></tr>
+  <tr class="even left"><td>Department</td><td class="right"><%= @employee.employee_department.name if !@employee.employee_department.nil? %></td></tr>
+  <tr class="odd left"><td>Category</td><td class="right"><%= @employee.employee_category.name if !@employee.employee_category.nil? %></td></tr>
+  <tr class="even left"><td>Position</td><td class="right"><%= @employee.employee_position.name if !@employee.employee_position.nil? %></td></tr>
 
   <tr class="odd left"><td>Grade</td><td class="right"><%= @employee.employee_grade.name unless @employee.employee_grade.nil? %></td></tr>
   <tr class="even left"><td>Job title</td><td class="right"><%= @employee.job_title %></td></tr>
